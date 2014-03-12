@@ -40,7 +40,17 @@ void printForwardingTable(distvec_rt * table){
     }
 }
 
+dvRoutingTable * initDVRT(struct node * connectTable){
+	dvRoutingTable * table = (dvRoutingTable *) malloc(connectTable-> curr_index) * sizeof(dvRoutingTable));
+	table -> nodeID = connectTable -> node_num;
+	table -> numNodes = connectTable -> arr_length;
+	table -> numNeighbors = connectTable -> curr_index;
 
+	table -> nextHop = malloc((connectTable->arr_length) * sizeof(int));
+	table -> linkCost = mallow((connectTable -> arr_length) * sizeof(int));
+
+	int
+}
 
 }
 
