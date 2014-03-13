@@ -19,7 +19,7 @@ void *get_in_addr(struct sockaddr *sa)
 
 int main(int argc, char *argv[])
 {
-	
+
 	if (argc != 3) {
 		fprintf(stderr,"usage: manager topologyfile messagefile\n");
 		exit(1);
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	for (i = 0; i < totalMessages; i++) {
 		printf("%d %d %s\n",srcNode[i], destNode[i], message[i]);
 	}
-	
+
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
 	struct addrinfo hints, *servinfo, *p;
 	struct sockaddr_storage their_addr; // connector's address information
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "manager: getaddrinfo error: %s\n", gai_strerror(rv));
 		return 1;
 	}	
-	
+
 	// loop through all the results and bind to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next) {
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 			perror("manager: socket");
 			continue;
 		}
-	
+
 		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
 				sizeof(int)) == -1) {
 			perror("manager: setsockopt");
@@ -101,50 +101,84 @@ int main(int argc, char *argv[])
 	}
 
 	printf("manager: waiting for connections...\n");
-	
-	//spawn a new process for each router
-	//int i = 0;
-	for(i = 0; i < nNodes; i++) {
-		if (!fork()) 
-			{ // this is the child router process
-				close(sockfd);
-				//executeRouter(argv[1]);
-			}
-	}
 
-	int sockArray[nNodes];
-	for (i = 0; i < nNodes; i++){
-		sin_size = sizeof their_addr;
+
+	while(1) {  // main accept() loop
+		
+        sin_size = sizeof their_addr;
+        //Aceept incoming connection on listening socket
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
 		if (new_fd == -1) {
-			perror("manager: accept");
+			perror("accept");
 			continue;
 		}
-		else {
-			sockArray[i] = new_fd;
-		}
 
+        //Convert the IP address to a printable form
 		inet_ntop(their_addr.ss_family,
 			get_in_addr((struct sockaddr *)&their_addr),
 			s, sizeof s);
-		//printf("manager: got connection from %s\n", s);
+		printf("server: got connection from %s\n", s);
 
-		if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) {
-			perror("router: recv");
-			exit(1);
+		if (!fork()) { // this is the child process
+			close(sockfd); // child doesn't need the listener
+
+        //Send the first message introducing the game
+        if(send(new_fd, "SEND TEXT", 13, 0)== -1){
+            perror("send");        
+            exit(0);
+        }
+
 		}
-		buf[numbytes] = '\0';
-		//assignPorts(topology, i, atoi(buf));
+		close(new_fd);  // parent doesn't need this
 	}
-	
-	
-	for (i = 0; i < nNodes; i++){
-		new_fd = sockArray[i];
-		if (send(new_fd, (&topology[i]), sizeof(node), 0) == -1)
-			perror("manager: send");
 
-		close(new_fd); 
-	}
-	
 	return 0;
+
+
+
+	// //spawn a new process for each router
+	// //int i = 0;
+	// for(i = 0; i < nNodes; i++) {
+	// 	if (!fork()) 
+	// 		{ // this is the child router process
+	// 			close(sockfd);
+	// 			//executeRouter(argv[1]);
+	// 		}
+	// }
+
+	// int sockArray[nNodes];
+	// for (i = 0; i < nNodes; i++){
+	// 	sin_size = sizeof their_addr;
+	// 	new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+	// 	if (new_fd == -1) {
+	// 		perror("manager: accept");
+	// 		continue;
+	// 	}
+	// 	else {
+	// 		sockArray[i] = new_fd;
+	// 	}
+
+	// 	inet_ntop(their_addr.ss_family,
+	// 		get_in_addr((struct sockaddr *)&their_addr),
+	// 		s, sizeof s);
+	// 	//printf("manager: got connection from %s\n", s);
+
+	// 	if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) {
+	// 		perror("router: recv");
+	// 		exit(1);
+	// 	}
+	// 	buf[numbytes] = '\0';
+	// 	//assignPorts(topology, i, atoi(buf));
+	// }
+
+
+	// for (i = 0; i < nNodes; i++){
+	// 	new_fd = sockArray[i];
+	// 	if (send(new_fd, (&topology[i]), sizeof(node), 0) == -1)
+	// 		perror("manager: send");
+
+	// 	close(new_fd); 
+	// }
+
+	// return 0;
 }
