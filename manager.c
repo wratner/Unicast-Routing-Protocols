@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 	int dead = 0;
 	char * welcome;
 	welcome = "Hello!";
-	node send_top = ;
+	//node * send_top = ;
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -106,7 +106,7 @@ if (p == NULL)  {
 	printf("manager: waiting for connections...\n");
 
 
-	//while(1) {
+	while(1) {
 
 		sin_size = sizeof their_addr;
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
@@ -127,7 +127,7 @@ if (p == NULL)  {
 			exit(0);
 		}
 
-		if(send(new_fd, send_top, sizeof(send_top), 0) == -1){
+		if(send(new_fd, topology, sizeof(topology), 0) == -1){
 			perror("send");
 			exit(0);
 		}
@@ -141,7 +141,7 @@ if (p == NULL)  {
 
 
 			close(new_fd);
-		//} 
+		} 
 
 		return 0;
 }
