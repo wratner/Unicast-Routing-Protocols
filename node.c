@@ -1,4 +1,4 @@
-#include "mp3.h"
+#include "mp2.h"
 
 node * initNode(int node_num, int nNodes, int num_neigh, int dest, int cost)
 {
@@ -74,4 +74,3 @@ void print_node(node *n, int index)
 		}
 	}
 }
-
