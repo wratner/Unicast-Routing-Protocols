@@ -1,5 +1,15 @@
 //THIS IS THE MANAGER FILE
-#include "mp3.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include "mp2.h"
+#include <arpa/inet.h>
 #define PORT "2345"
 #define BACKLOG 10
 
@@ -45,8 +55,6 @@ int main(int argc, char *argv[])
 	int yes = 1;
 	char s[INET6_ADDRSTRLEN];
 	int rv;
-	int numbytes;
-	char buf[MAXDATASIZE];
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -104,7 +112,7 @@ int main(int argc, char *argv[])
 
 
 	while(1) {  // main accept() loop
-		
+
         sin_size = sizeof their_addr;
         //Aceept incoming connection on listening socket
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
@@ -133,52 +141,4 @@ int main(int argc, char *argv[])
 	}
 
 	return 0;
-
-
-
-	// //spawn a new process for each router
-	// //int i = 0;
-	// for(i = 0; i < nNodes; i++) {
-	// 	if (!fork()) 
-	// 		{ // this is the child router process
-	// 			close(sockfd);
-	// 			//executeRouter(argv[1]);
-	// 		}
-	// }
-
-	// int sockArray[nNodes];
-	// for (i = 0; i < nNodes; i++){
-	// 	sin_size = sizeof their_addr;
-	// 	new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-	// 	if (new_fd == -1) {
-	// 		perror("manager: accept");
-	// 		continue;
-	// 	}
-	// 	else {
-	// 		sockArray[i] = new_fd;
-	// 	}
-
-	// 	inet_ntop(their_addr.ss_family,
-	// 		get_in_addr((struct sockaddr *)&their_addr),
-	// 		s, sizeof s);
-	// 	//printf("manager: got connection from %s\n", s);
-
-	// 	if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) {
-	// 		perror("router: recv");
-	// 		exit(1);
-	// 	}
-	// 	buf[numbytes] = '\0';
-	// 	//assignPorts(topology, i, atoi(buf));
-	// }
-
-
-	// for (i = 0; i < nNodes; i++){
-	// 	new_fd = sockArray[i];
-	// 	if (send(new_fd, (&topology[i]), sizeof(node), 0) == -1)
-	// 		perror("manager: send");
-
-	// 	close(new_fd); 
-	// }
-
-	// return 0;
 }
